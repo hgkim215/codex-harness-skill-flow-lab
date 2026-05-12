@@ -1,121 +1,138 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
 import './App.css'
 
+type Status = 'todo' | 'doing' | 'done'
+type Priority = 'low' | 'medium' | 'high'
+
+type Task = {
+  id: number
+  title: string
+  status: Status
+  priority: Priority
+}
+
+const initialTasks: Task[] = [
+  {
+    id: 1,
+    title: 'Clarify workflow scope',
+    status: 'done',
+    priority: 'high',
+  },
+  {
+    id: 2,
+    title: 'Inspect baseline evidence',
+    status: 'doing',
+    priority: 'medium',
+  },
+  {
+    id: 3,
+    title: 'Draft execution handoff',
+    status: 'todo',
+    priority: 'high',
+  },
+]
+
+const statusLabels: Record<Status | 'all', string> = {
+  all: 'All',
+  todo: 'Todo',
+  doing: 'Doing',
+  done: 'Done',
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [tasks] = useState<Task[]>(initialTasks)
+  const [draft, setDraft] = useState('')
+  const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all')
+
+  const visibleTasks = useMemo(() => {
+    if (statusFilter === 'all') {
+      return tasks
+    }
+
+    return tasks.filter((task) => task.status === statusFilter)
+  }, [statusFilter, tasks])
+
+  const totals = useMemo(
+    () => ({
+      all: tasks.length,
+      todo: tasks.filter((task) => task.status === 'todo').length,
+      doing: tasks.filter((task) => task.status === 'doing').length,
+      done: tasks.filter((task) => task.status === 'done').length,
+    }),
+    [tasks],
+  )
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setDraft('')
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <main className="app-shell">
+      <header className="app-header">
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
+          <p className="eyebrow">Codex skill flow lab</p>
+          <h1>Harness Flow Board</h1>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+        <p className="header-copy">
+          A compact task board used to test interview, analysis, planning,
+          execution, QA, visual QA, and review handoffs.
+        </p>
+      </header>
+
+      <section className="summary-grid" aria-label="Task summary">
+        {(Object.keys(totals) as Array<keyof typeof totals>).map((key) => (
+          <article className="summary-card" key={key}>
+            <span>{statusLabels[key]}</span>
+            <strong>{totals[key]}</strong>
+          </article>
+        ))}
       </section>
 
-      <div className="ticks"></div>
+      <section className="board-panel">
+        <form className="task-form" onSubmit={handleSubmit}>
+          <label htmlFor="task-title">New task</label>
+          <div>
+            <input
+              id="task-title"
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="Add a workflow task"
+            />
+            <button type="submit">Add task</button>
+          </div>
+        </form>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="filter-row" aria-label="Status filters">
+          {(Object.keys(statusLabels) as Array<Status | 'all'>).map((status) => (
+            <button
+              aria-pressed={statusFilter === status}
+              className={statusFilter === status ? 'active' : ''}
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              type="button"
+            >
+              {statusLabels[status]}
+            </button>
+          ))}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+
+        <div className="task-list" aria-label="Tasks">
+          {visibleTasks.map((task) => (
+            <article className="task-card" key={task.id}>
+              <div>
+                <h2>{task.title}</h2>
+                <p>{statusLabels[task.status]}</p>
+              </div>
+              <span className={`priority priority-${task.priority}`}>
+                {task.priority}
+              </span>
+            </article>
+          ))}
         </div>
       </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    </main>
   )
 }
 
