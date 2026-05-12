@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import './App.css'
 
@@ -33,6 +33,8 @@ const initialTasks: Task[] = [
   },
 ]
 
+const storageKey = 'harness-flow-board-tasks'
+
 const statusLabels: Record<Status | 'all', string> = {
   all: 'All',
   todo: 'Todo',
@@ -40,10 +42,58 @@ const statusLabels: Record<Status | 'all', string> = {
   done: 'Done',
 }
 
+function isStatus(value: unknown): value is Status {
+  return value === 'todo' || value === 'doing' || value === 'done'
+}
+
+function isPriority(value: unknown): value is Priority {
+  return value === 'low' || value === 'medium' || value === 'high'
+}
+
+function isTask(value: unknown): value is Task {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const candidate = value as Record<string, unknown>
+
+  return (
+    typeof candidate.id === 'number' &&
+    Number.isFinite(candidate.id) &&
+    typeof candidate.title === 'string' &&
+    isStatus(candidate.status) &&
+    isPriority(candidate.priority)
+  )
+}
+
+function loadInitialTasks(): Task[] {
+  try {
+    const savedTasks = window.localStorage.getItem(storageKey)
+
+    if (savedTasks === null) {
+      return initialTasks
+    }
+
+    const parsed: unknown = JSON.parse(savedTasks)
+
+    if (Array.isArray(parsed) && parsed.every(isTask)) {
+      return parsed
+    }
+  } catch {
+    return initialTasks
+  }
+
+  return initialTasks
+}
+
 function App() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks)
+  const [tasks, setTasks] = useState<Task[]>(loadInitialTasks)
   const [draft, setDraft] = useState('')
   const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all')
+
+  useEffect(() => {
+    window.localStorage.setItem(storageKey, JSON.stringify(tasks))
+  }, [tasks])
 
   const visibleTasks = useMemo(() => {
     if (statusFilter === 'all') {

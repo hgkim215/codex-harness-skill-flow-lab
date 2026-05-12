@@ -33,4 +33,18 @@ describe('Harness Flow Board', () => {
 
     expect(screen.getByText('Write QA notes')).toBeInTheDocument()
   })
+
+  it('persists added tasks across remounts', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<App />)
+
+    await user.type(screen.getByLabelText('New task'), 'Persist QA task')
+    await user.click(screen.getByRole('button', { name: 'Add task' }))
+    expect(screen.getByText('Persist QA task')).toBeInTheDocument()
+
+    unmount()
+    render(<App />)
+
+    expect(screen.getByText('Persist QA task')).toBeInTheDocument()
+  })
 })

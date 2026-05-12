@@ -3,7 +3,6 @@ set -euo pipefail
 
 npm run lint
 npm run build
-if npm run | grep -qE '^  test$'; then
+if node -e "const pkg = require('./package.json'); process.exit(pkg.scripts && pkg.scripts.test ? 0 : 1)"; then
   npm test -- --run
 fi
-
