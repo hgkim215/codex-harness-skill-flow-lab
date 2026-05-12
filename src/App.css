@@ -1,12 +1,13 @@
 .app-shell {
+  box-sizing: border-box;
   color: #172033;
   display: flex;
   flex-direction: column;
   gap: 24px;
   margin: 0 auto;
-  min-width: 760px;
-  padding: 40px;
-  width: min(1120px, calc(100vw - 48px));
+  max-width: 1120px;
+  padding: clamp(20px, 5vw, 40px);
+  width: min(1120px, 100%);
 }
 
 .app-header {
@@ -35,6 +36,7 @@
   color: #475569;
   line-height: 1.55;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .summary-grid {
@@ -95,6 +97,7 @@
   border-radius: 6px;
   flex: 1;
   font: inherit;
+  min-width: 0;
   padding: 12px 14px;
 }
 
@@ -116,6 +119,7 @@
 .filter-row {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .filter-row button {
@@ -137,13 +141,20 @@
 .task-card {
   align-items: center;
   display: flex;
+  gap: 16px;
   justify-content: space-between;
   padding: 18px;
+  text-align: left;
+}
+
+.task-card > div {
+  min-width: 0;
 }
 
 .task-card h2 {
   font-size: 17px;
   margin: 0 0 4px;
+  overflow-wrap: anywhere;
 }
 
 .task-card p {
@@ -153,6 +164,7 @@
 
 .priority {
   border-radius: 999px;
+  flex-shrink: 0;
   font-size: 12px;
   font-weight: 800;
   padding: 5px 10px;
@@ -172,4 +184,59 @@
 .priority-low {
   background: #dcfce7;
   color: #166534;
+}
+
+@media (max-width: 760px) {
+  .app-header {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    gap: 18px;
+  }
+
+  .app-header {
+    gap: 12px;
+  }
+
+  .app-header h1 {
+    font-size: 34px;
+    line-height: 1.08;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .board-panel {
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .task-form div,
+  .filter-row,
+  .task-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .task-form button,
+  .filter-row button {
+    width: 100%;
+  }
+
+  .task-card {
+    gap: 10px;
+  }
+
+  .priority {
+    align-self: flex-start;
+  }
 }

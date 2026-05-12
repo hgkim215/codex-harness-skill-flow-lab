@@ -41,7 +41,7 @@ const statusLabels: Record<Status | 'all', string> = {
 }
 
 function App() {
-  const [tasks] = useState<Task[]>(initialTasks)
+  const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [draft, setDraft] = useState('')
   const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all')
 
@@ -65,6 +65,28 @@ function App() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    const title = draft.trim()
+
+    if (!title) {
+      return
+    }
+
+    setTasks((currentTasks) => {
+      const nextId =
+        currentTasks.reduce((maxId, task) => Math.max(maxId, task.id), 0) + 1
+
+      return [
+        ...currentTasks,
+        {
+          id: nextId,
+          title,
+          status: 'todo',
+          priority: 'medium',
+        },
+      ]
+    })
+
     setDraft('')
   }
 
